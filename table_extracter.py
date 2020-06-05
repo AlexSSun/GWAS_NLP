@@ -29,7 +29,7 @@ def table_to_2d(t):
     n_cols = sum([int(i.attrs['colspan']) for i in t.find('tr').findAll(['th','td'])])
     
     # build an empty matrix for all possible cells
-    table = [[None] * n_cols for row in rows]
+    table = [[''] * n_cols for row in rows]
 
     # fill matrix from row data
     rowspans = {}  # track pending rowspans, column number mapping to count
@@ -88,7 +88,6 @@ def find_format(header):
         parts+=[a[i],b[i]]
     parts.append(a[-1])
 
-    
     # identify special character
     special_char_idx = []
     for idx,part in enumerate(parts):
@@ -162,12 +161,11 @@ def update_json(table_json, caption, footer):
     pre_superrow = None
 
     table = []
-
-
     for identifier,i in enumerate(table_json):
         cur_header = i['headers']
         cur_supperrow = i['superrow']
-        cur_supperrow = [x for x in cur_supperrow if x not in ['','None']][0]
+        if cur_supperrow!='':
+            cur_supperrow = [x for x in cur_supperrow if x not in ['','None']][0]
         if cur_header!=pre_header:
             section = []
             table.append({'identifier':identifier, 

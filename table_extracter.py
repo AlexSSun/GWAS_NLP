@@ -80,6 +80,8 @@ def find_format(header):
     params: header, single header str
     return: pattern, regex object 
     """
+    if header=='':
+        return None
     #     parts = nltk.tokenize.word_tokenize(header)
     a = re.split(r'[:|/,;]', header)
     b = re.findall(r'[:|/,;]', header)
@@ -289,8 +291,8 @@ if __name__=='__main__':
         # ## store in json
         is_dir = os.path.isdir(os.path.join(target_dir,"{}_tables".format(pmc)))
         if not is_dir:
-            os.mkdir(os.path.join(target_dir,"{}_tables".format(pmc)))
+            os.makedirs(os.path.join(target_dir,"{}_tables".format(pmc)))
             
-        with open(os.path.join(target_dir,pmc,"{}_table{}.json".format(pmc,table_num)), "w") as outfile: 
+        with open(os.path.join(target_dir,"{}_tables".format(pmc),"{}_table{}.json".format(pmc,table_num)), "w") as outfile: 
             json.dump(table_json, outfile)
 

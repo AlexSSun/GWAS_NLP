@@ -81,33 +81,33 @@ def find_format(header):
     return: pattern, regex object 
     """
     #     parts = nltk.tokenize.word_tokenize(header)
-        a = re.split(r'[:|/,;]', header)
-        b = re.findall(r'[:|/,;]', header)
-        parts = []
-        for i in range(len(b)):
-            parts+=[a[i],b[i]]
-        parts.append(a[-1])
+    a = re.split(r'[:|/,;]', header)
+    b = re.findall(r'[:|/,;]', header)
+    parts = []
+    for i in range(len(b)):
+        parts+=[a[i],b[i]]
+    parts.append(a[-1])
 
-        
-        # identify special character
-        special_char_idx = []
-        for idx,part in enumerate(parts):
-            if part in ':|\/,;':
-                special_char_idx.append(idx)
-        
-        # generate regex pattern
-        if special_char_idx:
-            pattern = r''
-            for idx in range(len(parts)):
-                if idx in special_char_idx:
-                    char = parts[idx]
-                    pattern+='({})'.format(char)
-                else:
-                    pattern+='(\w+)'
-            pattern = re.compile(pattern)
-            return pattern
-        else:
-            return None
+    
+    # identify special character
+    special_char_idx = []
+    for idx,part in enumerate(parts):
+        if part in ':|\/,;':
+            special_char_idx.append(idx)
+    
+    # generate regex pattern
+    if special_char_idx:
+        pattern = r''
+        for idx in range(len(parts)):
+            if idx in special_char_idx:
+                char = parts[idx]
+                pattern+='({})'.format(char)
+            else:
+                pattern+='(\w+)'
+        pattern = re.compile(pattern)
+        return pattern
+    else:
+        return None
 
 def test_format(pattern,s):
     """

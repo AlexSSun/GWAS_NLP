@@ -14,6 +14,12 @@ import json
 from utils import *
 
 def extract_text(soup):
+    """
+    convert beautiful soup object into a python dict object with cleaned main text body
+    ––––––––––––––––––––––––––––––––––––––––––––––––––
+    params: soup
+    return: result
+    """
     h1 = soup.find_all('h1',"content-title")[0].get_text()
     main_text = []
 #     paragraphs = soup.find_all('p',attrs='p')
@@ -39,12 +45,12 @@ def extract_text(soup):
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--pbs_index", type=int, help="pbs index/the file index")
+    # parser.add_argument("-p", "--pbs_index", type=int, help="pbs index/the file index")
     parser.add_argument("-b", "--base_dir", help="base directory for html files")
     parser.add_argument("-t", "--target_dir", help="target directory for output")
 
     args = parser.parse_args()
-    pbs_index = args.pbs_index
+    # pbs_index = args.pbs_index
     base_dir = args.base_dir
     target_dir = args.target_dir
 

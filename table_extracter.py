@@ -14,6 +14,13 @@ import json
 from utils import *
 
 def table_to_2d(t):
+    """
+    transform a table to single cells
+    ––––––––––––––––––––––––––––––––––––––––––––––––––
+    params: t, soup object of table
+    return: table 
+    """
+
     # https://stackoverflow.com/questions/48393253/how-to-parse-table-with-rowspan-and-colspan
     
     rows = t.find_all('tr')
@@ -55,12 +62,24 @@ def table_to_2d(t):
     return table
 
 def check_superrow(row):
+    """
+    check if the current row is a superrow
+    ––––––––––––––––––––––––––––––––––––––––––––––––––
+    params: row, list object
+    return: bool
+    """
     if len(set([i for i in row if (str(i)!='')&(str(i)!='\n')&(str(i)!='None')]))==1:
         return True
     else:
         return False
 
 def find_format(header):
+    """
+    determine if there exists a pattern in the header cell
+    ––––––––––––––––––––––––––––––––––––––––––––––––––
+    params: header, single header str
+    return: pattern, regex object 
+    """
     #     parts = nltk.tokenize.word_tokenize(header)
         a = re.split(r'[:|/,;]', header)
         b = re.findall(r'[:|/,;]', header)
@@ -68,7 +87,7 @@ def find_format(header):
         for i in range(len(b)):
             parts+=[a[i],b[i]]
         parts.append(a[-1])
-        parts
+
         
         # identify special character
         special_char_idx = []
@@ -91,6 +110,13 @@ def find_format(header):
             return None
 
 def test_format(pattern,s):
+    """
+    check if the element conforms to the regex pattern
+    ––––––––––––––––––––––––––––––––––––––––––––––––––
+    params: pattern
+            s
+    return: bool
+    """
     if re.search(pattern,s):
         return True
     return False
@@ -131,6 +157,41 @@ def table2dict(table_2d):
                                 'row': row,})
     return tmp_list
 
+def update_json(table_json, caption, footer):
+    pre_header = None
+    pre_superrow = None
+
+    table = []
+
+
+    for identifier,i in enumerate(table_json):
+        cur_header = i['headers']
+        cur_supperrow = i['superrow']
+        cur_supperrow = [x for x in cur_supperrow if x not in ['','None']][0]
+        if cur_header!=pre_header:
+            section = []
+            table.append({'identifier':identifier, 
+                          'title':caption, 
+                          'columns':cur_header,
+                          'section':section})
+        elif cur_header==pre_header:
+            section = table[-1]['section']
+
+        results = i['row']
+        section_name = cur_supperrow
+        if cur_supperrow!=pre_superrow:
+            section.append({'section_name':section_name, 
+                            'results': [results]})
+        elif cur_supperrow==pre_superrow:
+
+            section[-1]['results'].append(results)
+
+        pre_header = cur_header
+        pre_superrow = cur_supperrow
+
+
+    new_json = {'table':table,'footer':footer}
+    return new_json
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
@@ -166,7 +227,7 @@ if __name__=='__main__':
 
     # # One table
 
-    for table in soup.find_all('table',recursive=True):
+    for table_num, table in enumerate(soup.find_all('table',recursive=True)): 
         # ## caption and footer
         caption = table.find_previous('div','caption').get_text()
         footer = [i.get_text() for i in table.parent.find_next_siblings('div','tblwrap-foot')]
@@ -208,13 +269,30 @@ if __name__=='__main__':
                             row+=split_format(pattern,row[col_idx])
                 pattern = None
 
-        # ## store in json
+
         table_json = table2dict(table_2d)
 
+        # ## merge headers
+        sep = '<!>'
+        for row in table_json:
+            headers = row['headers']
+            
+            new_header = []
+            for col_idx in range(len(headers[0])):
+                new_element = ''
+                for r_idx in range(len(headers)):
+                    new_element += headers[r_idx][col_idx]+sep
+                new_element = new_element.rstrip(sep)
+                new_header.append(new_element)
+            row['headers'] = new_header
+
+        new_json = update_json(table_json, caption, footer)
+
+        # ## store in json
         is_dir = os.path.isdir(os.path.join(target_dir,"{}_tables".format(pmc)))
         if not is_dir:
             os.mkdir(os.path.join(target_dir,"{}_tables".format(pmc)))
             
-        with open(os.path.join(target_dir,pmc,"{}_{}.json".format(pmc,caption)), "w") as outfile: 
+        with open(os.path.join(target_dir,pmc,"{}_table{}.json".format(pmc,table_num)), "w") as outfile: 
             json.dump(table_json, outfile)
 

@@ -15,13 +15,18 @@ from utils import *
 
 def table_to_2d(t):
     """
-    transform a table to single cells
-    ––––––––––––––––––––––––––––––––––––––––––––––––––
-    params: t, soup object of table
-    return: table 
-    """
+    transform a table's span cells to single cells
+    see also: https://stackoverflow.com/questions/48393253/how-to-parse-table-with-rowspan-and-colspan
 
-    # https://stackoverflow.com/questions/48393253/how-to-parse-table-with-rowspan-and-colspan
+    Args:
+        t: BeautifulSoup object of table
+
+    Returns:
+        table: table represented in nested lists with single cells
+
+    Raises:
+        KeyError: Raises an exception.
+    """
     
     rows = t.find_all('tr')
 
@@ -75,11 +80,18 @@ def check_superrow(row):
 
 def find_format(header):
     """
-    determine if there exists a pattern in the header cell
-    ––––––––––––––––––––––––––––––––––––––––––––––––––
-    params: header, single header str
-    return: pattern, regex object 
+    determine if there exists a splittable pattern in the header cell
+
+    Args:
+        header: single header str
+
+    Returns:
+        pattern: regex object 
+
+    Raises:
+        KeyError: Raises an exception.
     """
+
     if header=='':
         return None
     #     parts = nltk.tokenize.word_tokenize(header)
@@ -113,21 +125,53 @@ def find_format(header):
 def test_format(pattern,s):
     """
     check if the element conforms to the regex pattern
-    ––––––––––––––––––––––––––––––––––––––––––––––––––
-    params: pattern
-            s
-    return: bool
+
+    Args:
+        header: single header str
+        s: element in string format
+
+    Returns:
+        result: bool
+
+    Raises:
+        KeyError: Raises an exception.
     """
+
     if re.search(pattern,s):
         return True
     return False
 
 def split_format(pattern,s):
+    """
+    split s according to regex pattern
+
+    Args:
+        pattern: regex object 
+        s: element in string format
+
+    Returns:
+        list of substrings
+
+    Raises:
+        KeyError: Raises an exception.
+    """
 #     return pattern.split(s)[1:-1]
 #     return [i for i in pattern.split(s) if i not in ':|\/,;']
     return [i for i in re.split(r'[:|/,;]', s) if i not in ':|\/,;']
 
 def get_headers(t):
+    """
+    identify headers from a table
+
+    Args:
+        t: BeautifulSoup object of table
+
+    Returns:
+        idx_list: a list of header index
+
+    Raises:
+        KeyError: Raises an exception.
+    """
     idx_list = []
     for idx,row in enumerate(t.findAll('tr')):
         if row.findAll('th'):
@@ -135,6 +179,18 @@ def get_headers(t):
     return idx_list
 
 def get_superrows(t):
+    """
+    determine if there exists a splittable pattern in the header cell
+
+    Args:
+        t: BeautifulSoup object of table
+
+    Returns:
+        idx_list: a list of superrow index
+
+    Raises:
+        KeyError: Raises an exception.
+    """
     idx_list = []
     for idx,row in enumerate(t):
         if idx not in get_headers(t):
@@ -143,8 +199,20 @@ def get_superrows(t):
     return idx_list
 
 def table2dict(table_2d):
+    """
+    represent a table (nested lists) in dict format
+
+    Args:
+        table_2d: single cell table represented in nested lists
+
+    Returns:
+        res: table represented in a list of dict object for each row
+
+    Raises:
+        KeyError: Raises an exception.
+    """
     headers = [table_2d[i] for i in header_idx]
-    tmp_list = []
+    res = []
     superrow = ''
     if table_2d==None:
         return None
@@ -153,12 +221,24 @@ def table2dict(table_2d):
             if r_idx in superrow_idx:
                 superrow = row
             else:
-                tmp_list.append({'headers':headers,
-                                'superrow':superrow, 
-                                'row': row,})
-    return tmp_list
+                res.append({'headers':headers,
+                            'superrow':superrow, 
+                            'row': row,})
+    return res
 
 def update_json(table_json, caption, footer):
+    """
+    represent a table (nested lists) in dict format
+
+    Args:
+        table_json: table represented in a list of dict object for each row, output from table2dict()
+        caption: table caption, str
+        footer: table footer, str
+
+    Returns:
+        res: table represented in the updated json model
+    """
+
     pre_header = None
     pre_superrow = None
 
@@ -189,9 +269,8 @@ def update_json(table_json, caption, footer):
         pre_header = cur_header
         pre_superrow = cur_supperrow
 
-
-    new_json = {'table':table,'footer':footer}
-    return new_json
+    res = {'table':table,'footer':footer}
+    return res
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()

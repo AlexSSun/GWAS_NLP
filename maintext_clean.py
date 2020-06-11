@@ -16,9 +16,12 @@ from utils import *
 def extract_text(soup):
     """
     convert beautiful soup object into a python dict object with cleaned main text body
-    ––––––––––––––––––––––––––––––––––––––––––––––––––
-    params: soup
-    return: result
+    
+    Args: 
+        soup: BeautifulSoup object of html
+    
+    Return: 
+        result: dict of the maintext 
     """
     h1 = soup.find_all('h1',"content-title")[0].get_text()
     main_text = []

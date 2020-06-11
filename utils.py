@@ -10,6 +10,15 @@ import pandas as pd
 import json
 
 def get_files(base_dir):
+    """
+    recursively retrieve all PMC.html files from the directory
+    
+    Args: 
+        base_dir: base directory
+    
+    Return: 
+        file_list: a list of filepath
+    """
     file_list = []
     files = os.listdir(base_dir)
     for i in files:
@@ -21,6 +30,13 @@ def get_files(base_dir):
     return file_list
 
 def process_supsub(soup):
+    """
+    add underscore (_) before all superscript or subscript text
+    
+    Args: 
+        soup: BeautifulSoup object of html
+    
+    """
     for sup in soup.find_all(['sup','sub']):
         s = sup.get_text()
         if sup.string==None:
@@ -31,6 +47,13 @@ def process_supsub(soup):
             sup.string.replace_with('_{} '.format(s))
 
 def process_em(soup):
+    """
+    remove all emphasized text
+    
+    Args: 
+        soup: BeautifulSoup object of html
+
+    """
     for em in soup.find_all('em'):
         s = em.get_text()
         if em.string==None:
@@ -40,10 +63,24 @@ def process_em(soup):
             
 
 def process_caption(soup):
+    """
+    remove all caption div tags from html
+    
+    Args: 
+        soup: BeautifulSoup object of html
+
+    """
     for div in soup.find_all('div', attrs='caption'):
         div.extract()
 
 def process_table_figures(soup):
+    """
+    remove all tables and figures div tags from html
+    
+    Args: 
+        soup: BeautifulSoup object of html
+
+    """
     for div in soup.find_all('div',attrs=['table-wrap','table','fig']):
         div.extract()
         

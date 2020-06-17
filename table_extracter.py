@@ -198,81 +198,65 @@ def get_superrows(t):
                 idx_list.append(idx)
     return idx_list
 
-def table2dict(table_2d):
-    """
-    represent a table (nested lists) in dict format
+def is_number(s):
+    try:
+        float(s.replace(',',''))
+        return True
+    except ValueError:
+        return False
 
-    Args:
-        table_2d: single cell table represented in nested lists
+def is_mix(s):
+    if any(char.isdigit() for char in s):
+        if any(char for char in s if char.isdigit()==False):
+            return True
+    return False
 
-    Returns:
-        res: table represented in a list of dict object for each row
+def is_text(s):
+    if any(char.isdigit() for char in s):
+        return False
+    return True
 
-    Raises:
-        KeyError: Raises an exception.
-    """
-    headers = [table_2d[i] for i in header_idx]
-    res = []
-    superrow = ''
-    if table_2d==None:
-        return None
-    for r_idx,row in enumerate(table_2d):
-        if r_idx not in header_idx:
-            if r_idx in superrow_idx:
-                superrow = row
-            else:
-                res.append({'headers':headers,
-                            'superrow':superrow, 
-                            'row': row,})
-    return res
+def table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer):
+    tables = []
+    sections = []
+    cur_table = {}
+    cur_section = {}
 
-def update_json(table_json, table_num, caption, footer):
-    """
-    represent a table (nested lists) in dict format
-
-    Args:
-        table_json: table represented in a list of dict object for each row, output from table2dict()
-        caption: table caption, str
-        footer: table footer, str
-
-    Returns:
-        res: table represented in the updated json model
-    """
-
-    pre_header = None
+    pre_header = []
     pre_superrow = None
+    cur_header = ''
+    cur_superrow = ''
+    for row_idx,row in enumerate(table_2d):
+        if row_idx in header_idx:
+            cur_header = [table_2d[i] for i in [i for i in subheader_idx if row_idx in i][0]]
+        elif row_idx in superrow_idx:
+            cur_superrow = [i for i in row if i not in ['','None']][0]
+        else:      
+            if cur_header!=pre_header:
+                sections = []
+                pre_superrow = None
+                cur_table = {'identifier':str(table_num+1), 
+                             'title':caption, 
+                             'columns':cur_header,
+                             'section':sections,
+                             'footer':footer}
+                tables.append(cur_table)
+            elif cur_header==pre_header:
+                cur_table['section'] = sections
+            if cur_superrow!=pre_superrow:
+                cur_section = {'section_name':cur_superrow, 
+                               'results': [row]}
+                sections.append(cur_section)
+            elif cur_superrow==pre_superrow:
+                cur_section['results'].append(row)
 
-    table = []
-    for i in table_json:
-        cur_header = i['headers']
-        cur_supperrow = i['superrow']
-        if cur_supperrow!='':
-            cur_supperrow = [x for x in cur_supperrow if x not in ['','None']][0]
-        if cur_header!=pre_header:
-            section = []
-            table.append({'identifier':table_num, 
-                          'title':caption, 
-                          'columns':cur_header,
-                          'section':section,
-                          'footer':footer})
-        elif cur_header==pre_header:
-            section = table[-1]['section']
+            pre_header = cur_header
+            pre_superrow = cur_superrow
 
-        results = i['row']
-        section_name = cur_supperrow
-        if cur_supperrow!=pre_superrow:
-            section.append({'section_name':section_name,
-                            'results': [results]})
-        elif cur_supperrow==pre_superrow:
-
-            section[-1]['results'].append(results)
-
-        pre_header = cur_header
-        pre_superrow = cur_supperrow
-
-    # res = {'table':table,}
-    # return res
-    return table
+    if len(tables)>1:
+        for table_idx,table in enumerate(tables):
+            table['identifier'] += '.{}'.format(table_idx+1)
+    return tables
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
@@ -329,6 +313,52 @@ if __name__=='__main__':
                     if check_superrow(row):
                         superrow_idx.append(row_idx)
 
+        ## Identify subheaders
+        value_idx = [i for i in range(len(table_2d)) if i not in header_idx+superrow_idx]
+        col_type = []
+        for col_idx in range(len(table_2d[0])):
+            cur_col = [i[col_idx] for i in table_2d]
+            num_cnt = 0
+            txt_cnt = 0
+            mix_cnt = 0
+            for cell in cur_col:
+                cell = cell.lower()
+                if cell in ['none', '', '-',]:
+                    continue
+                elif is_number(cell):
+                    num_cnt+=1
+                elif is_mix(cell):
+                    mix_cnt+=1
+                elif is_text(cell):
+                    txt_cnt+=1
+            if max(num_cnt,txt_cnt,mix_cnt)==num_cnt:
+                col_type.append('num')
+            elif max(num_cnt,txt_cnt,mix_cnt)==txt_cnt:
+                col_type.append('txt')
+            else:
+                col_type.append('mix')
+        subheader_idx = []
+        for row_idx in value_idx:
+            cur_row = table_2d[row_idx]
+            unmatch_cnt = 0
+            for col_idx in range(len(cur_row)):
+                cell = cur_row[col_idx].lower()
+                if is_text(cell) and col_type[col_idx]!='txt' and cell not in ['none', '', '-',]:
+                    unmatch_cnt+=1
+            if unmatch_cnt>=len(cur_row)/2:
+                subheader_idx.append(row_idx)
+        header_idx+=subheader_idx
+
+        subheader_idx = []
+        tmp = [header_idx[0]]
+        for i,j in zip(header_idx,header_idx[1:]):
+            if j==i+1:
+                tmp.append(j)
+            else:
+                subheader_idx.append(tmp)
+                tmp=[j]
+        subheader_idx.append(tmp)
+
         # ## split pattern
         for col_idx,th in enumerate(table_2d[header_idx[-1]]):
             pattern = find_format(th)
@@ -350,12 +380,12 @@ if __name__=='__main__':
                             row+=split_format(pattern,row[col_idx])
                 pattern = None
 
-        table_json = table2dict(table_2d)
+        cur_table = table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer)
 
         # ## merge headers
         sep = '<!>'
-        for row in table_json:
-            headers = row['headers']
+        for table in cur_table:
+            headers = table['columns']
             
             new_header = []
             for col_idx in range(len(headers[0])):
@@ -364,17 +394,11 @@ if __name__=='__main__':
                     new_element += headers[r_idx][col_idx]+sep
                 new_element = new_element.rstrip(sep)
                 new_header.append(new_element)
-            row['headers'] = new_header
+            table['columns'] = new_header
 
-        cur_table = update_json(table_json, table_num, caption, footer)
         tables+=cur_table
 
     table_json = {'tables':tables}
-
-    # ## store in json
-    # is_dir = os.path.isdir(os.path.join(target_dir,"{}_tables".format(pmc)))
-    # if not is_dir:
-    #     os.makedirs(os.path.join(target_dir,"{}_tables".format(pmc)))
         
     with open(os.path.join(target_dir,"{}_tables.json".format(pmc)), "w") as outfile: 
         json.dump(table_json, outfile)

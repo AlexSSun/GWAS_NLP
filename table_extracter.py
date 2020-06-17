@@ -226,7 +226,7 @@ def table2dict(table_2d):
                             'row': row,})
     return res
 
-def update_json(table_json, caption, footer):
+def update_json(table_json, table_num, caption, footer):
     """
     represent a table (nested lists) in dict format
 
@@ -243,24 +243,25 @@ def update_json(table_json, caption, footer):
     pre_superrow = None
 
     table = []
-    for identifier,i in enumerate(table_json):
+    for i in table_json:
         cur_header = i['headers']
         cur_supperrow = i['superrow']
         if cur_supperrow!='':
             cur_supperrow = [x for x in cur_supperrow if x not in ['','None']][0]
         if cur_header!=pre_header:
             section = []
-            table.append({'identifier':identifier, 
+            table.append({'identifier':table_num, 
                           'title':caption, 
                           'columns':cur_header,
-                          'section':section})
+                          'section':section,
+                          'footer':footer})
         elif cur_header==pre_header:
             section = table[-1]['section']
 
         results = i['row']
         section_name = cur_supperrow
         if cur_supperrow!=pre_superrow:
-            section.append({'section_name':section_name, 
+            section.append({'section_name':section_name,
                             'results': [results]})
         elif cur_supperrow==pre_superrow:
 
@@ -269,8 +270,9 @@ def update_json(table_json, caption, footer):
         pre_header = cur_header
         pre_superrow = cur_supperrow
 
-    res = {'table':table,'footer':footer}
-    return res
+    # res = {'table':table,}
+    # return res
+    return table
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
@@ -305,7 +307,7 @@ if __name__=='__main__':
     process_em(soup)
 
     # # One table
-
+    tables = []
     for table_num, table in enumerate(soup.find_all('table',recursive=True)): 
         # ## caption and footer
         caption = table.find_previous('div','caption').get_text()
@@ -348,7 +350,6 @@ if __name__=='__main__':
                             row+=split_format(pattern,row[col_idx])
                 pattern = None
 
-
         table_json = table2dict(table_2d)
 
         # ## merge headers
@@ -365,13 +366,16 @@ if __name__=='__main__':
                 new_header.append(new_element)
             row['headers'] = new_header
 
-        new_json = update_json(table_json, caption, footer)
+        cur_table = update_json(table_json, table_num, caption, footer)
+        tables+=cur_table
 
-        # ## store in json
-        is_dir = os.path.isdir(os.path.join(target_dir,"{}_tables".format(pmc)))
-        if not is_dir:
-            os.makedirs(os.path.join(target_dir,"{}_tables".format(pmc)))
-            
-        with open(os.path.join(target_dir,"{}_tables".format(pmc),"{}_table{}.json".format(pmc,table_num)), "w") as outfile: 
-            json.dump(table_json, outfile)
+    table_json = {'tables':tables}
+
+    # ## store in json
+    # is_dir = os.path.isdir(os.path.join(target_dir,"{}_tables".format(pmc)))
+    # if not is_dir:
+    #     os.makedirs(os.path.join(target_dir,"{}_tables".format(pmc)))
+        
+    with open(os.path.join(target_dir,"{}_tables.json".format(pmc)), "w") as outfile: 
+        json.dump(table_json, outfile)
 

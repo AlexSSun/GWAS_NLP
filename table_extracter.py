@@ -359,7 +359,7 @@ if __name__=='__main__':
                 tmp=[j]
         subheader_idx.append(tmp)
 
-        # ## split pattern
+        # ## split cell pattern
         for col_idx,th in enumerate(table_2d[header_idx[-1]]):
             pattern = find_format(th)
             if pattern:
@@ -379,6 +379,23 @@ if __name__=='__main__':
                         else:
                             row+=split_format(pattern,row[col_idx])
                 pattern = None
+
+        # ## identify section names in index column
+        if superrow_idx==[]:
+        # if (superrow_idx==[])&(table_2d[0][0]==''):
+            first_col = [row[0] for row in table_2d]
+            first_col_vals = [i for i in first_col if first_col.index(i) not in header_idx] 
+            unique_vals = set([i for i in first_col_vals if i not in ['','None']])
+            section_values = None
+            if len(unique_vals)<=len(first_col_vals)/2:
+                section_values = list(unique_vals)
+            for i in section_values:
+                superrow_idx.append(first_col.index(i))
+            n_cols = len(table_2d[0])
+            for idx,val in zip(section_vals_idx, section_values):
+                table_2d = table_2d[:idx]+[[val]*n_cols]+table_2d[idx:]
+            for row in table_2d:
+                row.pop(0)
 
         cur_table = table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer)
 
@@ -402,4 +419,3 @@ if __name__=='__main__':
         
     with open(os.path.join(target_dir,"{}_tables.json".format(pmc)), "w") as outfile: 
         json.dump(table_json, outfile)
-

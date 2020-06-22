@@ -421,7 +421,7 @@ if __name__=='__main__':
     table_json = {'tables':tables}
     
     if not os.path.isdir(target_dir):
-        os.path.mkdir(target_dir)
+        os.mkdir(target_dir)
 
     with open(os.path.join(target_dir,"{}_tables.json".format(pmc)), "w") as outfile: 
         json.dump(table_json, outfile)

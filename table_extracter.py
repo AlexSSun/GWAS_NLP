@@ -296,135 +296,135 @@ if __name__=='__main__':
     tables = []
     for table_num, table in enumerate(soup.find_all('table',recursive=True)): 
 
-        # try:
+        try:
         # ## caption and footer
-        caption = table.find_previous('div','caption').get_text()
-        footer = [i.get_text() for i in table.parent.find_next_siblings('div','tblwrap-foot')]
+            caption = table.find_previous('div','caption').get_text()
+            footer = [i.get_text() for i in table.parent.find_next_siblings('div','tblwrap-foot')]
 
-        header_idx = []
-        for idx,row in enumerate(table.findAll('tr')):
-            if row.findAll('th'):
-                header_idx.append(idx)
+            header_idx = []
+            for idx,row in enumerate(table.findAll('tr')):
+                if row.findAll('th'):
+                    header_idx.append(idx)
 
-        # ## span table to single-cells
-        table_2d = table_to_2d(table)
+            # ## span table to single-cells
+            table_2d = table_to_2d(table)
 
-        ## find superrows
-        superrow_idx = []
-        if table_2d!=None:
-            for row_idx,row in enumerate(table_2d):
-                if row_idx not in header_idx:
-                    if check_superrow(row):
-                        superrow_idx.append(row_idx)
+            ## find superrows
+            superrow_idx = []
+            if table_2d!=None:
+                for row_idx,row in enumerate(table_2d):
+                    if row_idx not in header_idx:
+                        if check_superrow(row):
+                            superrow_idx.append(row_idx)
 
-        # ## identify section names in index column
-        if superrow_idx==[]:
-        # if (superrow_idx==[])&(table_2d[0][0]==''):
-            first_col = [row[0] for row in table_2d]
-            first_col_vals = [i for i in first_col if first_col.index(i) not in header_idx] 
-            unique_vals = set([i for i in first_col_vals if i not in ['','None']])
-            if len(unique_vals)<=len(first_col_vals)/2:
-                section_names = list(unique_vals)
-                for i in section_names:
-                    superrow_idx.append(first_col.index(i))
-                n_cols = len(table_2d[0])
-                for idx,val in zip(superrow_idx, section_names):
-                    table_2d = table_2d[:idx]+[[val]*n_cols]+table_2d[idx:]
-                #update superrow_idx after superrow insertion
-                superrow_idx = []
+            # ## identify section names in index column
+            if superrow_idx==[]:
+            # if (superrow_idx==[])&(table_2d[0][0]==''):
                 first_col = [row[0] for row in table_2d]
-                for i in section_names:
-                    superrow_idx.append(first_col.index(i))
-                for row in table_2d:
-                    row.pop(0)
+                first_col_vals = [i for i in first_col if first_col.index(i) not in header_idx] 
+                unique_vals = set([i for i in first_col_vals if i not in ['','None']])
+                if len(unique_vals)<=len(first_col_vals)/2:
+                    section_names = list(unique_vals)
+                    for i in section_names:
+                        superrow_idx.append(first_col.index(i))
+                    n_cols = len(table_2d[0])
+                    for idx,val in zip(superrow_idx, section_names):
+                        table_2d = table_2d[:idx]+[[val]*n_cols]+table_2d[idx:]
+                    #update superrow_idx after superrow insertion
+                    superrow_idx = []
+                    first_col = [row[0] for row in table_2d]
+                    for i in section_names:
+                        superrow_idx.append(first_col.index(i))
+                    for row in table_2d:
+                        row.pop(0)
 
-        ## Identify subheaders
-        value_idx = [i for i in range(len(table_2d)) if i not in header_idx+superrow_idx]
-        col_type = []
-        for col_idx in range(len(table_2d[0])):
-            cur_col = [i[col_idx] for i in table_2d]
-            num_cnt = 0
-            txt_cnt = 0
-            mix_cnt = 0
-            for cell in cur_col:
-                cell = cell.lower()
-                if cell in ['none', '', '-',]:
-                    continue
-                elif is_number(cell):
-                    num_cnt+=1
-                elif is_mix(cell):
-                    mix_cnt+=1
-                elif is_text(cell):
-                    txt_cnt+=1
-            if max(num_cnt,txt_cnt,mix_cnt)==num_cnt:
-                col_type.append('num')
-            elif max(num_cnt,txt_cnt,mix_cnt)==txt_cnt:
-                col_type.append('txt')
-            else:
-                col_type.append('mix')
-        subheader_idx = []
-        for row_idx in value_idx:
-            cur_row = table_2d[row_idx]
-            unmatch_cnt = 0
-            for col_idx in range(len(cur_row)):
-                cell = cur_row[col_idx].lower()
-                if is_text(cell) and col_type[col_idx]!='txt' and cell not in ['none', '', '-',]:
-                    unmatch_cnt+=1
-            if unmatch_cnt>=len(cur_row)/2:
-                subheader_idx.append(row_idx)
-        header_idx+=subheader_idx
+            ## Identify subheaders
+            value_idx = [i for i in range(len(table_2d)) if i not in header_idx+superrow_idx]
+            col_type = []
+            for col_idx in range(len(table_2d[0])):
+                cur_col = [i[col_idx] for i in table_2d]
+                num_cnt = 0
+                txt_cnt = 0
+                mix_cnt = 0
+                for cell in cur_col:
+                    cell = cell.lower()
+                    if cell in ['none', '', '-',]:
+                        continue
+                    elif is_number(cell):
+                        num_cnt+=1
+                    elif is_mix(cell):
+                        mix_cnt+=1
+                    elif is_text(cell):
+                        txt_cnt+=1
+                if max(num_cnt,txt_cnt,mix_cnt)==num_cnt:
+                    col_type.append('num')
+                elif max(num_cnt,txt_cnt,mix_cnt)==txt_cnt:
+                    col_type.append('txt')
+                else:
+                    col_type.append('mix')
+            subheader_idx = []
+            for row_idx in value_idx:
+                cur_row = table_2d[row_idx]
+                unmatch_cnt = 0
+                for col_idx in range(len(cur_row)):
+                    cell = cur_row[col_idx].lower()
+                    if is_text(cell) and col_type[col_idx]!='txt' and cell not in ['none', '', '-',]:
+                        unmatch_cnt+=1
+                if unmatch_cnt>=len(cur_row)/2:
+                    subheader_idx.append(row_idx)
+            header_idx+=subheader_idx
 
-        subheader_idx = []
-        tmp = [header_idx[0]]
-        for i,j in zip(header_idx,header_idx[1:]):
-            if j==i+1:
-                tmp.append(j)
-            else:
-                subheader_idx.append(tmp)
-                tmp=[j]
-        subheader_idx.append(tmp)
+            subheader_idx = []
+            tmp = [header_idx[0]]
+            for i,j in zip(header_idx,header_idx[1:]):
+                if j==i+1:
+                    tmp.append(j)
+                else:
+                    subheader_idx.append(tmp)
+                    tmp=[j]
+            subheader_idx.append(tmp)
 
-        # ## split cell pattern
-        for col_idx,th in enumerate(table_2d[header_idx[-1]]):
-            pattern = find_format(th)
-            if pattern:
-                cnt = 0
-                for row_idx in range(len(table_2d)):
-                    if (row_idx not in header_idx)&(row_idx not in superrow_idx):
-                        cnt+=test_format(pattern,table_2d[row_idx][col_idx])
-                # if all elements follow the same pattern
-                if cnt==len(table_2d)-len(header_idx)-len(superrow_idx):
-                    for row_idx,row in enumerate(table_2d):
-                        if (row_idx in header_idx)&(row_idx!=header_idx[-1]):
-                            row+=[table_2d[row_idx][col_idx],table_2d[row_idx][col_idx]]
-                        elif (row_idx in header_idx)&(row_idx==header_idx[-1]):
-                            row+=split_format(pattern,row[col_idx])
-                        elif row_idx in superrow_idx:
-                            row+=[table_2d[row_idx][col_idx],table_2d[row_idx][col_idx]]
-                        else:
-                            row+=split_format(pattern,row[col_idx])
-                pattern = None
+            # ## split cell pattern
+            for col_idx,th in enumerate(table_2d[header_idx[-1]]):
+                pattern = find_format(th)
+                if pattern:
+                    cnt = 0
+                    for row_idx in range(len(table_2d)):
+                        if (row_idx not in header_idx)&(row_idx not in superrow_idx):
+                            cnt+=test_format(pattern,table_2d[row_idx][col_idx])
+                    # if all elements follow the same pattern
+                    if cnt==len(table_2d)-len(header_idx)-len(superrow_idx):
+                        for row_idx,row in enumerate(table_2d):
+                            if (row_idx in header_idx)&(row_idx!=header_idx[-1]):
+                                row+=[table_2d[row_idx][col_idx],table_2d[row_idx][col_idx]]
+                            elif (row_idx in header_idx)&(row_idx==header_idx[-1]):
+                                row+=split_format(pattern,row[col_idx])
+                            elif row_idx in superrow_idx:
+                                row+=[table_2d[row_idx][col_idx],table_2d[row_idx][col_idx]]
+                            else:
+                                row+=split_format(pattern,row[col_idx])
+                    pattern = None
 
-        cur_table = table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer)
+            cur_table = table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer)
 
-        # ## merge headers
-        sep = '<!>'
-        for table in cur_table:
-            headers = table['columns']
-            
-            new_header = []
-            for col_idx in range(len(headers[0])):
-                new_element = ''
-                for r_idx in range(len(headers)):
-                    new_element += headers[r_idx][col_idx]+sep
-                new_element = new_element.rstrip(sep)
-                new_header.append(new_element)
-            table['columns'] = new_header
+            # ## merge headers
+            sep = '<!>'
+            for table in cur_table:
+                headers = table['columns']
+                
+                new_header = []
+                for col_idx in range(len(headers[0])):
+                    new_element = ''
+                    for r_idx in range(len(headers)):
+                        new_element += headers[r_idx][col_idx]+sep
+                    new_element = new_element.rstrip(sep)
+                    new_header.append(new_element)
+                table['columns'] = new_header
 
-        tables+=cur_table
-        # except Exception as e:
-        #     print('table not extracted ', table_num)
-        #     print(e)
+            tables+=cur_table
+        except Exception as e:
+            print('table not extracted ', table_num)
+            print(e)
 
     table_json = {'tables':tables}
     

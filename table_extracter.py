@@ -216,7 +216,7 @@ def is_text(s):
         return False
     return True
 
-ddef table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer):
+def table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer):
     tables = []
     sections = []
     cur_table = {}

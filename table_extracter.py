@@ -55,6 +55,10 @@ def table_to_2d(t):
             # next column is offset by the colspan
             span_offset += colspan - 1
             value = cell.get_text()
+            # clean the cell
+            value = value.strip()
+            if value.startswith('(') and value.endswith(')'):
+                value = value[1:-1]
             for drow, dcol in product(range(rowspan), range(colspan)):
                 try:
                     table[row_idx + drow][col_idx + dcol] = value
@@ -429,7 +433,7 @@ if __name__=='__main__':
     table_json = {'tables':tables}
     
     if not os.path.isdir(target_dir):
-        os.mkdir(target_dir)
+        os.makedirs(target_dir)
 
     with open(os.path.join(target_dir,"{}_tables.json".format(pmc)), "w") as outfile: 
         json.dump(table_json, outfile)

@@ -14,19 +14,7 @@ import json
 from utils import *
 
 def table_to_2d(t):
-    """
-    transform a table's span cells to single cells
-    see also: https://stackoverflow.com/questions/48393253/how-to-parse-table-with-rowspan-and-colspan
-
-    Args:
-        t: BeautifulSoup object of table
-
-    Returns:
-        table: table represented in nested lists with single cells
-
-    Raises:
-        KeyError: Raises an exception.
-    """
+    # https://stackoverflow.com/questions/48393253/how-to-parse-table-with-rowspan-and-colspan
     
     rows = t.find_all('tr')
 
@@ -56,9 +44,14 @@ def table_to_2d(t):
             span_offset += colspan - 1
             value = cell.get_text()
             # clean the cell
-            value = value.strip()
+            value = value.strip().replace('\u2009',' ')
+#             value = value.replace('\u2009',' ')
             if value.startswith('(') and value.endswith(')'):
                 value = value[1:-1]
+            if re.match('((\d+.\d+)|(\d+))[\s{0,1}][××][\s{0,1}]10_([−-]{0,1})(\d+)',value):
+                value = value.replace(' × 10_','e').replace('×10_','e').replace('−','-')
+            if re.match('((\d+.\d+)|(\d+))e([−-]{0,1}\d+)',value):
+                value = str(float(value))
             for drow, dcol in product(range(rowspan), range(colspan)):
                 try:
                     table[row_idx + drow][col_idx + dcol] = value

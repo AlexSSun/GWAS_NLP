@@ -100,5 +100,5 @@ if __name__=='__main__':
 
     for k,v in maintext_dict.items():
         with open(os.path.join(target_dir,"{}_maintext.json".format(k)), "w") as outfile: 
-            json.dump(v, outfile) 
+            json.dump(v, outfile,ensure_ascii=False)
 

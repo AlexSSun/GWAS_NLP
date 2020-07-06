@@ -429,4 +429,4 @@ if __name__=='__main__':
         os.makedirs(target_dir)
 
     with open(os.path.join(target_dir,"{}_tables.json".format(pmc)), "w") as outfile: 
-        json.dump(table_json, outfile)
+        json.dump(table_json, outfile,ensure_ascii=False)

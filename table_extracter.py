@@ -13,6 +13,8 @@ import nltk
 import json
 from utils import *
 
+
+
 def table_to_2d(t):
     # https://stackoverflow.com/questions/48393253/how-to-parse-table-with-rowspan-and-colspan
     
@@ -48,10 +50,15 @@ def table_to_2d(t):
 #             value = value.replace('\u2009',' ')
             if value.startswith('(') and value.endswith(')'):
                 value = value[1:-1]
-            if re.match('((\d+.\d+)|(\d+))[\s{0,1}][××][\s{0,1}]10_([−-]{0,1})(\d+)',value):
-                value = value.replace(' × 10_','e').replace('×10_','e').replace('−','-')
-            if re.match('((\d+.\d+)|(\d+))e([−-]{0,1}\d+)',value):
-                value = str(float(value))
+            if re.match(pval_regex,value):
+#                 value = value.replace(' × 10_','e').replace('×10_','e').replace('−','-')
+                value = re.sub(r'(\s{0,1})[*××xX](\s{0,1})10_','e',value).replace('−','-')
+#             if re.match('^((\d+.\d+)|(\d+))[eE]([−-]{0,1}\d+)$',value):
+#                 value = float(value)
+            try:
+                value = float(value)
+            except:
+                value = value
             for drow, dcol in product(range(rowspan), range(colspan)):
                 try:
                     table[row_idx + drow][col_idx + dcol] = value

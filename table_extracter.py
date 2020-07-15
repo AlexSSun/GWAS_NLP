@@ -56,7 +56,7 @@ def table_to_2d(t):
 #             if re.match('^((\d+.\d+)|(\d+))[eE]([−-]{0,1}\d+)$',value):
 #                 value = float(value)
             try:
-                value = float(value)
+                value = float(value.replace(',',''))
             except:
                 value = value
             for drow, dcol in product(range(rowspan), range(colspan)):
@@ -351,7 +351,7 @@ if __name__=='__main__':
                 txt_cnt = 0
                 mix_cnt = 0
                 for cell in cur_col:
-                    cell = cell.lower()
+                    cell = str(cell).lower()
                     if cell in ['none', '', '-',]:
                         continue
                     elif is_number(cell):
@@ -371,7 +371,7 @@ if __name__=='__main__':
                 cur_row = table_2d[row_idx]
                 unmatch_cnt = 0
                 for col_idx in range(len(cur_row)):
-                    cell = cur_row[col_idx].lower()
+                    cell = str(cur_row[col_idx]).lower()
                     if is_text(cell) and col_type[col_idx]!='txt' and cell not in ['none', '', '-',]:
                         unmatch_cnt+=1
                 if unmatch_cnt>=len(cur_row)/2:

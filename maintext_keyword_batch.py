@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import regex
 
 import nltk
 import owlready2

@@ -400,12 +400,12 @@ def keyword_recognition_spacy(p, abbre):
                     new_ent = Span(doc, start_idx, end_idx, label="PHE")
                     spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
                     p.ents = spans
-            elif re.match('((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([−-–]{0,1})(\d+)',s):
+            elif re.match('((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([–−-]{0,1})(\d+)',s):
                 num_match.append((s,start_idx,end_idx))
                 new_ent = Span(p, start_idx, end_idx, label="NUM")
                 spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
                 p.ents = spans
-            elif re.match('([−-–]{0,1})(\d+)([,.]{0,1})(\d+)',s):
+            elif re.match('([–−-]{0,1})(\d+)([,.]{0,1})(\d+)',s):
                 num_match.append((s,start_idx,end_idx))
                 new_ent = Span(p, start_idx, end_idx, label="NUM")
                 spans = spacy.util.filter_spans(list(p.ents)+[new_ent])

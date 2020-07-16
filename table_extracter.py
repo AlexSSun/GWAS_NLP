@@ -56,7 +56,7 @@ def table_to_2d(t):
 #             if re.match('^((\d+.\d+)|(\d+))[eE]([−-]{0,1}\d+)$',value):
 #                 value = float(value)
             try:
-                value = float(value.replace(',',''))
+                value = float(value.replace('−','-').replace('–','-').replace(',',''))
             except:
                 value = value
             for drow, dcol in product(range(rowspan), range(colspan)):

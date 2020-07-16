@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import json
 
-pval_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([−-–]{0,1})(\d+)'
+pval_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([–−-]{0,1})(\d+)'
 
 def get_files(base_dir):
     """

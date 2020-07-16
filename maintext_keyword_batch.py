@@ -462,6 +462,7 @@ if __name__=='__main__':
     # file_list = get_files(base_dir,pattern='(.*)PMC(.*)_maintest.json')
     file_list = os.listdir(base_dir)
     filepath = file_list[pbs_index]
+    filepath = os.path.join(base_dir,filepath)
 
     pmc = filepath.split('/')[-1].split('_')[0]
 
@@ -472,7 +473,6 @@ if __name__=='__main__':
 
     title = list(text_json.keys())[0]
     paragraphs = list(text_json.values())[0]
-
 
     full_text = [paragraph[2] for paragraph in paragraphs]
     full_text = ''.join(full_text)

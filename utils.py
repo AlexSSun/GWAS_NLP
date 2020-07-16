@@ -11,7 +11,7 @@ import json
 
 pval_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([–−-]{0,1})(\d+)'
 
-def get_files(base_dir):
+def get_files(base_dir,pattern=r'(.*)PMC(.*).html'):
     """
     recursively retrieve all PMC.html files from the directory
     
@@ -25,7 +25,7 @@ def get_files(base_dir):
     files = os.listdir(base_dir)
     for i in files:
         abs_path = os.path.join(base_dir,i)
-        if re.match(r'(.*)PMC(.*).html',abs_path):
+        if re.match(pattern,abs_path):
             file_list.append(abs_path)
         elif os.path.isdir(abs_path)&('ipynb_checkpoints' not in abs_path):
             file_list+=get_files(abs_path)

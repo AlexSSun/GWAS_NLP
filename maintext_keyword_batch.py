@@ -7,6 +7,7 @@ import owlready2
 import json
 import argparse
 import pickle
+from utils import *
 
 sys.path.append('../yans_git/abbreviation-extraction/')
 from abbreviations import schwartz_hearst
@@ -449,12 +450,18 @@ def pvalnum_tagger(sent):
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--filepath", type=str, help="filepath of the json file")
+    parser.add_argument("-p", "--pbs_index", type=int, help="pbs index/the file index")
+    parser.add_argument("-b", "--base_dir", type=str, help="base directory for html files")
     parser.add_argument("-t", "--target_dir", type=str, help="target directory for spacy output")
 
     args = parser.parse_args()
-    filepath = args.filepath
+    pbs_index = args.pbs_index
+    base_dir = args.base_dir
     target_dir = args.target_dir
+
+    file_list = get_files(base_dir,pattern='(.*)PMC(.*)_maintest.json')
+    filepath = file_list[pbs_index]
+
     pmc = filepath.split('/')[-1].split('_')[0]
 
     onto = owlready2.get_ontology("../hp.owl").load()

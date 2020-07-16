@@ -459,7 +459,8 @@ if __name__=='__main__':
     base_dir = args.base_dir
     target_dir = args.target_dir
 
-    file_list = get_files(base_dir,pattern='(.*)PMC(.*)_maintest.json')
+    # file_list = get_files(base_dir,pattern='(.*)PMC(.*)_maintest.json')
+    file_list = os.listdir(base_dir)
     filepath = file_list[pbs_index]
 
     pmc = filepath.split('/')[-1].split('_')[0]

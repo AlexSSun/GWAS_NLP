@@ -53,12 +53,12 @@ def table_to_2d(t):
             if re.match(pval_regex,value):
 #                 value = value.replace(' × 10_','e').replace('×10_','e').replace('−','-')
                 value = re.sub(r'(\s{0,1})[*××xX](\s{0,1})10_','e',value).replace('−','-')
-#             if re.match('^((\d+.\d+)|(\d+))[eE]([−-]{0,1}\d+)$',value):
-#                 value = float(value)
-            try:
-                value = float(value.replace('−','-').replace('–','-').replace(',',''))
-            except:
-                value = value
+            if re.match(pval_scientific_regex,value):
+                # value = re.sub(r'(\s{0,1})[–−-](\s{0,1})','-',value)
+            # try:
+            #     value = float(value.replace('−','-').replace('–','-').replace(',',''))
+            # except:
+            #     value = value
             for drow, dcol in product(range(rowspan), range(colspan)):
                 try:
                     table[row_idx + drow][col_idx + dcol] = value
@@ -408,7 +408,14 @@ if __name__=='__main__':
                             else:
                                 row+=split_format(pattern,row[col_idx])
                     pattern = None
-
+            # ## convert to float
+            for row in table_2d:
+                for cell in range(len(row)):
+                    try:
+                        row[cell] = float(row[cell].replace('−','-').replace('–','-').replace(',',''))
+                    except:
+                        row[cell] = row[cell]
+            
             cur_table = table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, caption, footer)
 
             # ## merge headers

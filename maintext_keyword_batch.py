@@ -492,3 +492,5 @@ if __name__=='__main__':
     target_filename = os.path.join(target_dir,pmc+"_ner.pkl")
     with open(target_filename,"wb") as handle:
         pickle.dump(doc,handle)
+
+

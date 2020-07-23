@@ -54,7 +54,7 @@ def table_to_2d(t):
 #                 value = value.replace(' × 10_','e').replace('×10_','e').replace('−','-')
                 value = re.sub(r'(\s{0,1})[*××xX](\s{0,1})10_','e',value).replace('−','-')
             if re.match(pval_scientific_regex,value):
-                # value = re.sub(r'(\s{0,1})[–−-](\s{0,1})','-',value)
+                value = re.sub(r'(\s{0,1})[–−-](\s{0,1})','-',value)
             # try:
             #     value = float(value.replace('−','-').replace('–','-').replace(',',''))
             # except:

@@ -26,7 +26,7 @@ def extract_text(soup):
     h1 = soup.find_all('h1',"content-title")[0].get_text()
     main_text = []
 #     paragraphs = soup.find_all('p',attrs='p')
-    paragraphs =soup.find_all('p',attrs={'id':re.compile('(__|_|)(p|P|Par|par)\d+')})
+    paragraphs = soup.find_all('p',attrs={'id':re.compile('(__|_|)(p|P|Par|par)\d+')})
 
     for p in paragraphs:
         h2 = p.find_previous('h2','head')

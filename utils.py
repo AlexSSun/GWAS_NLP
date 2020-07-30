@@ -11,7 +11,7 @@ import json
 
 # pval_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([–−-]{0,1})(\d+)'
 # pval_scientific_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[eE](\s{0,1})([–−-]{0,1})(\s{0,1})(\d+)'
-pval_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([–−-])(\d+)'
+pval_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10[_]{0,1}([–−-])(\d+)'
 pval_scientific_regex = r'((\d+.\d+)|(\d+))(\s{0,1})[eE](\s{0,1})([–−-])(\s{0,1})(\d+)'
 
 def get_files(base_dir,pattern=r'(.*)PMC(.*).html'):

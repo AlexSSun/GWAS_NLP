@@ -370,6 +370,16 @@ def match_snp(s):
     else:
         return False
 
+def regex_tagger(pattern, label, doc):
+    for match in re.finditer(pattern, doc.text):
+        char_start, char_end = match.span()
+        span = doc.char_span(char_start, char_end)
+        if span!=None:
+            start,end = span.start,span.end
+            new_ent = spacy.tokens.Span(doc,start,end,label=label)
+            spans = spacy.util.filter_spans(list(doc.ents)+[new_ent])
+            doc.ents = spans
+
 def keyword_recognition_spacy(p, abbre):
 #     loc = []
     phenotype_match = []
@@ -485,10 +495,48 @@ if __name__=='__main__':
     doc = nlp(full_text)
     doc.ents = tuple()
 
-    phenotype_match,pval_match,snp_match,num_match = keyword_recognition_spacy(doc,abbre)
+    # phenotype_match,pval_match,snp_match,num_match = keyword_recognition_spacy(doc,abbre)
+    hp = []
+    for i in onto.classes():
+        if i.name.startswith('HP'):
+            hp.append(i)
 
-    pvalnum_tagger(doc)
+    phenotypes = []
+    for i in hp:
+        phenotypes+=i.label
+        phenotypes+=i.hasExactSynonym
+        phenotypes+=i.hasBroadSynonym
+        phenotypes+=i.hasRelatedSynonym
+    phenotypes = [str(text) for text in phenotypes]
 
+    phrase_matcher = spacy.matcher.PhraseMatcher(nlp.vocab, attr="LOWER")
+    phenotypes_pipe = list(nlp.tokenizer.pipe(phenotypes))
+    abbre_pipe = list(nlp.tokenizer.pipe(abbre))
+    phrase_matcher.add('PHE', None, *phenotypes_pipe)
+    phrase_matcher.add('ABBREV', None, *abbre_pipe)
+
+    matches = phrase_matcher(doc)
+
+    entities = []
+    for match_id, start, end in matches:
+        if doc.vocab.strings[match_id] == "PHE":
+            new_ent = Span(doc, start, end, label="PHE")
+            entities.append(new_ent)
+        elif doc.vocab.strings[match_id] == "ABBREV":
+            short = str(doc[start,end])
+            long_form = abbre_dict[short]
+            if long_form in phenotypes:
+                new_ent = Span(doc, start, end, label="PHE")
+            else :
+                new_ent = Span(doc, start, end, label="ABBREV")
+            entities.append(new_ent)
+
+    doc.ents = entities
+
+    regex_tagger(pval_regex, 'PVALNUM', doc)
+    regex_tagger(pval_scientific_regex, 'PVALNUM', doc)
+    regex_tagger(r'^(rs)(\d+)$', 'SNP', doc)
+    
     target_filename = os.path.join(target_dir,pmc+"_ner.pkl")
     with open(target_filename,"wb") as handle:
         pickle.dump(doc,handle)

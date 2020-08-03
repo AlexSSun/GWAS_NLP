@@ -488,7 +488,7 @@ if __name__=='__main__':
     full_text = [paragraph[2] for paragraph in paragraphs]
     full_text = ''.join(full_text)
 
-    abbre = extract_abbreviation_definition_pairs(doc_text=full_text,most_common_definition=True)
+    abbre_dict = extract_abbreviation_definition_pairs(doc_text=full_text,most_common_definition=True)
 
     nlp = spacy.load("en_core_web_sm")
 
@@ -508,6 +508,7 @@ if __name__=='__main__':
         phenotypes+=i.hasBroadSynonym
         phenotypes+=i.hasRelatedSynonym
     phenotypes = [str(text) for text in phenotypes]
+    abbre = [str(text) for text in abbre_dict.keys()]
 
     phrase_matcher = spacy.matcher.PhraseMatcher(nlp.vocab, attr="LOWER")
     phenotypes_pipe = list(nlp.tokenizer.pipe(phenotypes))

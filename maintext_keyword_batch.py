@@ -524,7 +524,7 @@ if __name__=='__main__':
             new_ent = Span(doc, start, end, label="PHE")
             entities.append(new_ent)
         elif doc.vocab.strings[match_id] == "ABBREV":
-            short = str(doc[start,end])
+            short = str(doc[start:end])
             long_form = abbre_dict[short]
             if long_form in phenotypes:
                 new_ent = Span(doc, start, end, label="PHE")

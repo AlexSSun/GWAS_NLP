@@ -523,16 +523,18 @@ if __name__=='__main__':
         if doc.vocab.strings[match_id] == "PHE":
             new_ent = Span(doc, start, end, label="PHE")
             entities.append(new_ent)
-        elif doc.vocab.strings[match_id] == "ABBREV":
-            short = str(doc[start:end])
-            long_form = abbre_dict[short]
-            if long_form in phenotypes:
-                new_ent = Span(doc, start, end, label="PHE")
-            else :
-                new_ent = Span(doc, start, end, label="ABBREV")
-            entities.append(new_ent)
+        # elif doc.vocab.strings[match_id] == "ABBREV":
+        #     short = str(doc[start:end])
+        #     long_form = abbre_dict[short]
+        #     if long_form in phenotypes:
+        #         new_ent = Span(doc, start, end, label="PHE")
+        #     else :
+        #         new_ent = Span(doc, start, end, label="ABBREV")
+        #     entities.append(new_ent)
 
-    doc.ents = entities
+    doc.ents = spacy.util.filter_spans(entities)
+    # doc.ents = entities
+
 
     regex_tagger(pval_regex, 'PVALNUM', doc)
     regex_tagger(pval_scientific_regex, 'PVALNUM', doc)

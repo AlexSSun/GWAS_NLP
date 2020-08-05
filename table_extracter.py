@@ -52,9 +52,10 @@ def table_to_2d(t):
                 value = value[1:-1]
             if re.match(pval_regex,value):
 #                 value = value.replace(' × 10_','e').replace('×10_','e').replace('−','-')
-                value = re.sub(r'(\s{0,1})[*××xX](\s{0,1})10_','e',value).replace('−','-')
+                value = re.sub(r'(\s{0,1})[*××xX](\s{0,1})10(_{0,1})','e',value).replace('−','-')
             if re.match(pval_scientific_regex,value):
                 value = re.sub(r'(\s{0,1})[–−-](\s{0,1})','-',value)
+                value = re.sub(r'(\s{0,1})[eE]','e',value)
             # try:
             #     value = float(value.replace('−','-').replace('–','-').replace(',',''))
             # except:

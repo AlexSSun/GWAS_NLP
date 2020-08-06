@@ -538,7 +538,7 @@ if __name__=='__main__':
 
     regex_tagger(pval_regex, 'PVALNUM', doc)
     regex_tagger(pval_scientific_regex, 'PVALNUM', doc)
-    regex_tagger(r'^(rs)(\d+)$', 'SNP', doc)
+    regex_tagger(r'(rs)(\d+)', 'SNP', doc)
     
     target_filename = os.path.join(target_dir,pmc+"_ner.pkl")
     with open(target_filename,"wb") as handle:

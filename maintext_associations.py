@@ -9,6 +9,7 @@ import pandas as pd
 import json
 import spacy
 import pickle
+import argparse
 
 def regex_tagger(pattern, label, doc):
     for match in re.finditer(pattern, doc.text):

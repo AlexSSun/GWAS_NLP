@@ -42,7 +42,11 @@ def distance_to_root(sent, token):
 def dp_tree_distance(sent,token_1,token_2):
     dist_1 = distance_to_root(sent,token_1)
     dist_2 = distance_to_root(sent,token_2)
-    common_ancestor = closest_common_ancester(token_1,token_2)
+
+    if dist_2<=dist_1:
+        common_ancestor = closest_common_ancester(token_2,token_1)
+    else:
+        common_ancestor = closest_common_ancester(token_1,token_2)
     dist_3 = distance_to_root(sent,common_ancestor)
     return dist_1+dist_2-2*dist_3
     

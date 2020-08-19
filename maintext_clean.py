@@ -48,57 +48,29 @@ def extract_text(soup):
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    # parser.add_argument("-p", "--pbs_index", type=int, help="pbs index/the file index")
-    parser.add_argument("-b", "--base_dir", help="base directory for html files")
-    parser.add_argument("-t", "--target_dir", help="target directory for output")
+    parser.add_argument("-f", "--filepath", type=str, help="filepath of of html file to be processed")
+    parser.add_argument("-t", "--target_dir", type=str, help="target directory for output")
 
     args = parser.parse_args()
-    # pbs_index = args.pbs_index
-    base_dir = args.base_dir
+    filepath = args.filepath
     target_dir = args.target_dir
 
-    file_list = get_files(base_dir)
-    # filepath = file_list[pbs_index]
-
-    # with open(filepath,'r') as f:
-    #         text = f.read()
-    # soup = BeautifulSoup(text, 'html.parser')
-    # for e in soup.find_all(attrs={'style':['display:none','visibility:hidden']}):
-    #     e.extract()
-    # # what to do with in sentence reference
-    # for ref in soup.find_all(class_=['supplementary-material','figpopup','popnode','bibr']):
-    #     ref.extract()
-
-    # process_supsub(soup)
-    # process_em(soup)
-    # process_caption(soup)
-    # process_table_figures(soup)
-
-    # result = extract_text(soup)
-    # print(filepath, len(list(result.values())[0]))
-
-    maintext_dict = {}
-    for i,filepath in enumerate(file_list):
-        
-        pmc = filepath.split('/')[-1].strip('.html')
-        with open(filepath,'r') as f:
-            text = f.read()
-        soup = BeautifulSoup(text, 'html.parser')
-        for e in soup.find_all(attrs={'style':['display:none','visibility:hidden']}):
-            e.extract()
-        
-        # what to do with in sentence reference
-        for ref in soup.find_all(class_=['supplementary-material','figpopup','popnode','bibr']):
-            ref.extract()
-        process_supsub(soup)
-        process_em(soup)
-        
-        result = extract_text(soup)
-        maintext_dict[pmc] = result
+    pmc = filepath.split('/')[-1].strip('.html')
+    with open(filepath,'r') as f:
+        text = f.read()
+    soup = BeautifulSoup(text, 'html.parser')
+    for e in soup.find_all(attrs={'style':['display:none','visibility:hidden']}):
+        e.extract()
+    
+    # what to do with in sentence reference
+    for ref in soup.find_all(class_=['supplementary-material','figpopup','popnode','bibr']):
+        ref.extract()
+    process_supsub(soup)
+    process_em(soup)
+    
+    result = extract_text(soup)
 
     # target_dir = '../output/maintext/'
 
-    for k,v in maintext_dict.items():
-        with open(os.path.join(target_dir,"{}_maintext.json".format(k)), "w") as outfile: 
-            json.dump(v, outfile,ensure_ascii=False)
-
+    with open(os.path.join(target_dir,"{}_maintext.json".format(pmc)), "w") as outfile: 
+        json.dump(result, outfile,ensure_ascii=False)

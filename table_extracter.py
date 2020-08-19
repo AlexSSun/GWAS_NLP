@@ -193,8 +193,6 @@ def get_superrows(t):
     Returns:
         idx_list: a list of superrow index
 
-    Raises:
-        KeyError: Raises an exception.
     """
     idx_list = []
     for idx,row in enumerate(t):
@@ -267,19 +265,14 @@ def table2json(table_2d, header_idx, subheader_idx, superrow_idx, table_num, cap
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--pbs_index", type=int, help="pbs index/the file index")
-    parser.add_argument("-b", "--base_dir", help="base directory for html files")
-    parser.add_argument("-t", "--target_dir", help="target directory for output")
+    parser.add_argument("-f", "--filepath", type=str, help="filepath of the json file")
+    parser.add_argument("-t", "--target_dir", type=str, help="target directory for spacy output")
 
-    args = parser.parse_args()
-    pbs_index = args.pbs_index
-    base_dir = args.base_dir
+    args = parser.parse_args(
+    filepath = args.filepath
     target_dir = args.target_dir
 
-    file_list = get_files(base_dir)
-
     # # Load Soup
-    filepath = file_list[pbs_index]
     pmc = filepath.split('/')[-1].strip('.html')
     with open(filepath,'r') as f:
             text = f.read()

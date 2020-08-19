@@ -2,7 +2,7 @@ import os
 import sys
 import re
 
-import nltk
+# import nltk
 import owlready2
 import json
 import argparse
@@ -378,88 +378,6 @@ def regex_tagger(pattern, label, doc):
             spans = spacy.util.filter_spans(list(doc.ents)+[new_ent])
             doc.ents = spans
 
-# def keyword_recognition_spacy(p, abbre):
-# #     loc = []
-#     phenotype_match = []
-#     pval_match = []
-#     snp_match = []
-#     num_match = []
-
-#     for token_len in range(3,0,-1):
-#         for start_idx in range(len(p)-token_len):
-#             end_idx = start_idx+token_len
-#             s = p[start_idx:end_idx].text
-            
-#             if match_phenotype(s,onto):
-#                 phenotype_match.append((s,start_idx,end_idx))
-#                 new_ent = Span(doc, start_idx, end_idx, label="PHE")
-#                 spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
-#                 p.ents = spans
-#             elif match_pval(s) and token_len<=1:
-#                 pval_match.append((s,start_idx,end_idx))
-#                 new_ent = Span(doc, start_idx, end_idx, label="PVAL")
-#                 spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
-#                 p.ents = spans
-#             elif match_snp(s) and token_len==1:
-#                 snp_match.append((s,start_idx,end_idx))
-#                 new_ent = Span(doc, start_idx, end_idx, label="SNP")
-#                 spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
-#                 p.ents = spans
-#             elif s in abbre.keys():
-#                 if match_phenotype(str(abbre[s]),onto):
-#                     phenotype_match.append((s,start_idx,end_idx))
-#                     new_ent = Span(doc, start_idx, end_idx, label="PHE")
-#                     spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
-#                     p.ents = spans
-#             elif re.match('((\d+.\d+)|(\d+))(\s{0,1})[*××xX](\s{0,1})10_([–−-]{0,1})(\d+)',s):
-#                 num_match.append((s,start_idx,end_idx))
-#                 new_ent = Span(p, start_idx, end_idx, label="NUM")
-#                 spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
-#                 p.ents = spans
-#             elif re.match('([–−-]{0,1})(\d+)([,.]{0,1})(\d+)',s):
-#                 num_match.append((s,start_idx,end_idx))
-#                 new_ent = Span(p, start_idx, end_idx, label="NUM")
-#                 spans = spacy.util.filter_spans(list(p.ents)+[new_ent])
-#                 p.ents = spans
-#     # regex_tagger(pval_regex, 'PVALNUM', p)
-#     # regex_tagger(pval_scientific_regex, 'PVALNUM', pp)
-#     # regex_tagger(r'^(rs)(\d+)$', 'SNP', p)
-#     p.ents = spacy.util.filter_spans(list(p.ents))
-#     return phenotype_match,pval_match,snp_match,num_match
-
-# def pvalnum_tagger(sent):
-#     labels = [ent.label_ for ent in sent.ents]
-#     if labels==[]:
-#         return
-#     elif 'PVAL' in labels and 'NUM' in labels:
-# #         spans = list(sent.ents) + list(sent.noun_chunks)
-#         spans = list(sent.ents)
-#         spans = spacy.util.filter_spans(spans)
-#         with sent.retokenize() as retokenizer:
-#             for span in spans:
-#                 retokenizer.merge(span)
-#         for num in filter(lambda w: w.label_ == "NUM", sent.ents):
-#             # npadvmod
-#             if num[0].nbor(-2).ent_type_=='PVAL' and num[0].nbor(-1).tag_ in ['SYM','X','XX']:
-#                     span = Span(sent, start=num.start, end=num.end, label='PVALNUM')
-#                     sent.ents = [span if e == num else e for e in sent.ents]
-#             elif num[0].dep_=='npadvmod':
-# #                 if match_pval(num[0].head.text):
-#                 if num[0].head.ent_type_=='PVAL':
-#                     span = Span(sent, start=num.start, end=num.end, label='PVALNUM')
-#                     sent.ents = [span if e == num else e for e in sent.ents]
-#             # in parenthesis
-#             elif num[0].dep_=='appos':
-#                 if num[0].head.ent_type_=='PVAL':
-#                     span = Span(sent, start=num.start, end=num.end, label='PVALNUM')
-#                     sent.ents = [span if e == num else e for e in sent.ents]
-#                 for pval in filter(lambda w: w.label_ == "PVAL", sent.ents):
-#                     for i in pval[0].ancestors:
-#                         if i==num[0].head:
-#                             span = Span(sent, start=num.start, end=num.end, label='PVALNUM')
-#                             sent.ents = [span if e == num else e for e in sent.ents]
-#         return
-
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--filepath", type=str, help="filepath of the json file")
@@ -470,7 +388,7 @@ if __name__=='__main__':
     target_dir = args.target_dir
     pmc = filepath.split('/')[-1].split('_')[0]
 
-    onto = owlready2.get_ontology("../hp.owl").load()
+    onto = owlready2.get_ontology("/hpo/hp.owl").load()
 
     with open(filepath,'r') as f:
         text_json = json.load(f)
@@ -531,7 +449,7 @@ if __name__=='__main__':
     regex_tagger(pval_regex, 'PVALNUM', doc)
     regex_tagger(pval_scientific_regex, 'PVALNUM', doc)
     regex_tagger(r'^(rs)(\d+)$', 'SNP', doc)
-
+    
     target_filename = os.path.join(target_dir,pmc+"_ner.pkl")
     with open(target_filename,"wb") as handle:
         pickle.dump(doc,handle)

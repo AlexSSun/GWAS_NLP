@@ -8,7 +8,7 @@ import json
 import argparse
 import pickle
 
-sys.path.append('../yans_git/abbreviation-extraction/')
+# sys.path.append('../yans_git/abbreviation-extraction/')
 from abbreviations import schwartz_hearst
 from collections import defaultdict, Counter
 
